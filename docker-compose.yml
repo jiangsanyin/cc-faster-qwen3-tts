@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  svc-faster-qwen3-tts-jiang:
+    build: .
+    container_name: faster-qwen3-tts-jiangsy
+    restart: unless-stopped
+    environment:
+      # 指定 Gradio 监听所有 IP
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - HF_ENDPOINT=https://hf-mirror.com 
+      # 如果你的 /data/models 是 HuggingFace 的缓存格式，可以设置这个变量
+      - HF_HOME=/data/models
+    volumes:
+      # 1. 挂载代码目录 (实现改代码重启生效的核心)
+      # 将宿主机当前代码目录覆盖到容器的 /app，修改宿主机代码，容器内直接生效
+      - .:/app
+      
+      # 2. 挂载本地模型库目录
+      - /data/models:/data/models
+      
+      # 3. 挂载你的 TTS 数据/输出目录
+      - /data/tts:/data/tts
+      
+    ports:
+      - "10020:7860" # Web UI
+      - "10021:8000" # API
+      
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']   # 修改这里：指定索引为 3 的显卡（即第 4 块）
+              capabilities: [gpu]
+
+    # 【启动命令】你可以根据需要取消注释并在下方修改
+    # 默认执行 Dockerfile 中的 demo/server.py
+    # 如果想启动 API，可以改成如下格式，并指定你本地的模型路径：
+    # command:["python", "examples/openai_server.py", "--model", "/data/models/你的模型目录名称", "--port", "8000"]
+    # command: ["/bin/bash", "-c", "pip install --no-cache-dir nano-parakeet || true; pip install --no-cache-dir -e '.[demo]' -i https://pypi.tuna.tsinghua.edu.cn/simple && python demo/server.py"]
+    command: ["sleep", "infinity"]

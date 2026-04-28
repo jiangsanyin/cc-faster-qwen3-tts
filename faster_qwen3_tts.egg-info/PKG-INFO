@@ -1,3 +1,34 @@
+Metadata-Version: 2.1
+Name: faster-qwen3-tts
+Version: 0.2.5
+Summary: Real-time Qwen3-TTS inference using manual CUDA graph capture
+Author: Andres Marafioti
+License: MIT
+Project-URL: Homepage, https://github.com/andimarafioti/faster-qwen3-tts
+Project-URL: Repository, https://github.com/andimarafioti/faster-qwen3-tts
+Keywords: tts,qwen,cuda,cudagraph,streaming
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Sound/Audio :: Speech
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: qwen-tts>=0.1.1
+Requires-Dist: transformers>=4.57
+Requires-Dist: torch>=2.5.1
+Requires-Dist: numpy
+Requires-Dist: soundfile
+Requires-Dist: huggingface-hub
+Provides-Extra: demo
+Requires-Dist: fastapi>=0.100.0; extra == "demo"
+Requires-Dist: uvicorn[standard]>=0.24.0; extra == "demo"
+Requires-Dist: python-multipart>=0.0.7; extra == "demo"
+
 # Faster Qwen3-TTS
 
 Real-time Qwen3-TTS inference using CUDA graph capture. No Flash Attention, no vLLM, no Triton. Just `torch.cuda.CUDAGraph`. Supports both streaming and non-streaming generation.
@@ -59,8 +90,7 @@ faster-qwen3-tts clone \
 CustomVoice (predefined speaker IDs):
 
 ```bash
-# 这个项目 CLI 参数设计有点小瑕疵： faster-qwen3-tts custom 这个子命令里，--text 和 --output 被定义成了必填参数。先用“占位参数”绕过必填校验
-faster-qwen3-tts custom --model Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --list-speakers --text "tmp" --output /tmp/tmp.wav
+faster-qwen3-tts custom --model Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --list-speakers
 faster-qwen3-tts custom \
   --model Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice \
   --speaker aiden \
