@@ -1,0 +1,28 @@
+{
+  "mysql": {
+    "faster_qwen3_tts_tone": {
+      "host": "10.251.11.25",
+      "port": 3306,
+      "user": "root",
+      "password": "gmq#2020",
+      "database": "meta_human_zt0003",
+      "table_name": "faster_qwen3_tts_tone",
+      "charset": "utf8mb4",
+      "connect_timeout": 10,
+      "retry": 3
+    }
+  },
+  "redis": {
+    "faster_qwen3_tts_tone": {
+      "redis_ip": "10.255.33.13",
+      "redis_port": 6379,
+      "password": null,
+      "db": 1,
+      "key_prefix": "tts:voice:",
+      "cache_ttl_seconds": 86400
+    }
+  },
+  "tone_wav_file_dir": "/data/tts-jiang/faster-qwen3-tts-assets",
+  "allowed_audio_formats": ["wav", "mp3"],
+  "max_audio_file_size_mb": 20
+}

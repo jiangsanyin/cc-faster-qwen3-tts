@@ -1,0 +1,18 @@
+{
+  "7bc2a60e-d684-4586-aaae-daed646e56d9": {
+    "ref_audio": "/data/tts/faster-qwen3-tts-assets/tone_wav_files/7bc2a60e-d684-4586-aaae-daed646e56d9.wav",
+    "ref_text": "when to leave and where to go. It's not Shakespeare. It does not speak in memorable lines. My inner voice always gives it to me straight,",
+    "language": "English",
+    "status": "active",
+    "version": 1,
+    "updated_at": "2026-04-11T09:31:47+00:00"
+  },
+  "ff609584-a1c3-4f29-837a-615871f9ecd7": {
+    "ref_audio": "/data/tts/faster-qwen3-tts-assets/tone_wav_files/ff609584-a1c3-4f29-837a-615871f9ecd7.wav",
+    "ref_text": "欢迎您使用硅基数字人，实时交互能够通过面对面对话，通过情感互动的数字人提供更好的客户服务。",
+    "language": "Chinese",
+    "status": "active",
+    "version": 1,
+    "updated_at": "2026-04-11T09:31:52+00:00"
+  }
+}

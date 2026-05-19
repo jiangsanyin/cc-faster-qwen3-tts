@@ -15,11 +15,9 @@ benchmarks/generate_parity_samples_icl.py
 benchmarks/parakeet_coexistence.py
 benchmarks/streaming.py
 benchmarks/throughput.py
-examples/audio.py
 examples/extract_speaker.py
 examples/generate_with_embedding.py
 examples/openai_server.py
-examples/streaming_playback.py
 faster_qwen3_tts/__init__.py
 faster_qwen3_tts/cli.py
 faster_qwen3_tts/generate.py

@@ -209,151 +209,27 @@ def parity_generate_streaming(
     Streaming generation without CUDA graphs (dynamic cache).
 
     Yields (codec_chunk, timing_info) tuples every chunk_size steps.
+    Implementation: ``ParityStreamSession.step()`` (§6.2.8 顺序 1) 与历史行为逐块对齐。
     """
-    # NOTE: This function intentionally mirrors fast_generate_streaming. The core
-    # decode loop is duplicated so we can swap CUDA graphs/static cache for the
-    # dynamic-cache path while keeping sampling/chunking identical. If you edit
-    # the fast path, check parity_generate_streaming for matching changes.
-    eos_id = config.codec_eos_token_id
-    vocab_size = config.vocab_size
-    device = talker_input_embeds.device
+    from .parity_stream_session import ParityStreamSession
 
-    suppress_mask = torch.zeros(vocab_size, dtype=torch.bool, device=device)
-    suppress_start = max(0, vocab_size - 1024)
-    for i in range(suppress_start, vocab_size):
-        if i != eos_id:
-            suppress_mask[i] = True
-
-    # === PREFILL ===
-    t_start = time.time()
-
-    out = talker.forward(
-        inputs_embeds=talker_input_embeds,
+    session = ParityStreamSession(
+        talker=talker,
+        talker_input_embeds=talker_input_embeds,
         attention_mask=attention_mask,
-        use_cache=True,
-        output_hidden_states=True,
-        return_dict=True,
-        trailing_text_hidden=trailing_text_hiddens,
+        trailing_text_hiddens=trailing_text_hiddens,
         tts_pad_embed=tts_pad_embed,
-        generation_step=None,
-        past_hidden=None,
-        past_key_values=None,
-    )
-
-    talker_past_kv = out.past_key_values
-    past_hidden = out.past_hidden
-    gen_step = out.generation_step
-
-    logits = out.logits[:, -1, :]
-    suppress_eos = min_new_tokens > 0
-    token = sample_logits(
-        logits,
+        config=config,
+        max_new_tokens=max_new_tokens,
+        min_new_tokens=min_new_tokens,
         temperature=temperature,
         top_k=top_k,
         top_p=top_p,
         do_sample=do_sample,
-        suppress_mask=suppress_mask,
-        suppress_tokens=[eos_id] if suppress_eos else None,
+        repetition_penalty=repetition_penalty,
+        chunk_size=chunk_size,
     )
-
-    if attention_mask is not None:
-        attention_mask = attention_mask.clone()
-
-    torch.cuda.synchronize()
-    t_prefill = time.time() - t_start
-
-    # === DECODE LOOP — yield chunks ===
-    chunk_buffer = []
-    all_first_tokens = []
-    total_steps = 0
-    chunk_count = 0
-    chunk_start = time.time()
-
-    for _ in range(max_new_tokens):
-        if token.item() == eos_id:
-            break
-
-        cache_position = None
-        if attention_mask is not None:
-            attention_mask = torch.cat(
-                [attention_mask, attention_mask.new_ones((attention_mask.shape[0], 1))],
-                dim=1,
-            )
-            cache_position = torch.tensor([attention_mask.shape[1] - 1], device=attention_mask.device)
-
-        out = talker.forward(
-            input_ids=token.view(1, 1),
-            attention_mask=attention_mask,
-            use_cache=True,
-            output_hidden_states=True,
-            return_dict=True,
-            trailing_text_hidden=trailing_text_hiddens,
-            tts_pad_embed=tts_pad_embed,
-            generation_step=gen_step,
-            past_hidden=past_hidden,
-            past_key_values=talker_past_kv,
-            subtalker_dosample=do_sample,
-            subtalker_top_k=top_k,
-            subtalker_top_p=top_p,
-            subtalker_temperature=temperature,
-            cache_position=cache_position,
-        )
-
-        codec_ids = out.hidden_states[1]
-        if codec_ids is None:
-            break
-
-        chunk_buffer.append(codec_ids.squeeze(0).detach())
-        all_first_tokens.append(token.detach())
-
-        logits = out.logits[:, -1, :]
-        if repetition_penalty != 1.0 and all_first_tokens:
-            history = torch.stack(all_first_tokens)
-            logits = apply_repetition_penalty(logits, history, repetition_penalty)
-
-        suppress_eos = len(all_first_tokens) < min_new_tokens
-        token = sample_logits(
-            logits,
-            temperature=temperature,
-            top_k=top_k,
-            top_p=top_p,
-            do_sample=do_sample,
-            suppress_mask=suppress_mask,
-            suppress_tokens=[eos_id] if suppress_eos else None,
-        )
-
-        talker_past_kv = out.past_key_values
-        past_hidden = out.past_hidden
-        gen_step = out.generation_step
-
-        if len(chunk_buffer) >= chunk_size:
-            torch.cuda.synchronize()
-            chunk_decode_time = time.time() - chunk_start
-            total_steps += len(chunk_buffer)
-
-            yield torch.stack(chunk_buffer), {
-                'chunk_index': chunk_count,
-                'chunk_steps': len(chunk_buffer),
-                'prefill_ms': t_prefill * 1000 if chunk_count == 0 else 0,
-                'decode_ms': chunk_decode_time * 1000,
-                'total_steps_so_far': total_steps,
-                'is_final': False,
-            }
-
-            chunk_buffer = []
-            chunk_count += 1
-            chunk_start = time.time()
-
-    if chunk_buffer:
-        torch.cuda.synchronize()
-        chunk_decode_time = time.time() - chunk_start
-        total_steps += len(chunk_buffer)
-
-        yield torch.stack(chunk_buffer), {
-            'chunk_index': chunk_count,
-            'chunk_steps': len(chunk_buffer),
-            'prefill_ms': t_prefill * 1000 if chunk_count == 0 else 0,
-            'decode_ms': chunk_decode_time * 1000,
-            'total_steps_so_far': total_steps,
-            'is_final': True,
-        }
+    while not session.finished:
+        item = session.step()
+        if item is not None:
+            yield item[0], item[1]

@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git ffmpeg curl vim net-tools && apt-get install -y --no-install-recommends sox libsox-fmt-all && \
+    git ffmpeg curl vim net-tools jq && apt-get install -y --no-install-recommends sox libsox-fmt-all && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

@@ -1,0 +1,10 @@
+{
+  "voices_registry_path": "./voices_registry_v3.json",
+  "tone_wav_file_dir": "./tone_wav_files",
+  "allowed_audio_formats": ["wav", "mp3", "flac", "m4a"],
+  "max_audio_file_size_mb": 50,
+  "enable_orphan_cache_cleanup": true,
+  "orphan_cache_cleanup_threshold": 30,
+  "tts_internal_prime_url": "http://127.0.0.1:8000/internal/v1/prime-voice",
+  "tts_internal_prime_token": "your-secret-token-here"
+}

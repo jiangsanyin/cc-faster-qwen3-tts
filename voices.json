@@ -1,0 +1,17 @@
+{
+  "ref_audio_3": {
+    "ref_audio": "/data/tts/faster-qwen3-tts-assets/ref_audio_3.wav",
+    "ref_text": "Don't be deceived by the name. There is nothing cuddly about this particular teddy bear. In fact, it's the most dangerous plant in the desert.",
+    "language": "English"
+  },
+  "ref_audio_7": {
+    "ref_audio": "/data/tts/faster-qwen3-tts-assets/ref_audio_7.wav",
+    "ref_text": "变种病毒呢首次在内地的社区传播，天津市有两例的确诊，目前天津呢已经开始进行全市的核酸检测。",
+    "language": "Chinese"
+  },
+  "ref_audio_8": {
+    "ref_audio": "/data/tts/faster-qwen3-tts-assets/ref_audio_8.wav",
+    "ref_text": "欢迎您使用硅基数字人，实时交互能够通过面对面对话，通过情感互动的数字人提供更好的客户服务。",
+    "language": "Chinese"
+  }
+}

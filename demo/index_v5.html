@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qwen3-TTS v5 &#xb7; Clone &#x8bd5;&#x7528;</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #1a1a1a; background: #f4f6f9; }
+    body { max-width: 1180px; margin: 0 auto; padding: 1.5rem; }
+    .page-layout { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+    .main-col { flex: 1 1 480px; min-width: 0; }
+    .side-col {
+      flex: 1 1 300px;
+      max-width: 100%;
+      align-self: stretch;
+      position: sticky;
+      top: 0.75rem;
+      max-height: calc(100vh - 1.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 0;
+    }
+    @media (max-width: 880px) {
+      .side-col { position: static; max-height: none; align-self: stretch; }
+    }
+    h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+    .sub { color: #555; font-size: 0.9rem; margin-bottom: 1.25rem; }
+    .panel { background: #fff; border-radius: 10px; padding: 1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 1rem; }
+    label { display: block; font-size: 0.85rem; color: #444; margin-bottom: 0.35rem; }
+    select, textarea, input[type="text"] { width: 100%; box-sizing: border-box; padding: 0.5rem 0.6rem; border: 1px solid #ccd; border-radius: 6px; font-size: 0.95rem; }
+    textarea { min-height: 100px; resize: vertical; }
+    .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+    .row > div { flex: 1; min-width: 140px; }
+    button { background: #2563eb; color: #fff; border: none; padding: 0.55rem 1.2rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button.secondary { background: #64748b; }
+    .err { color: #b91c1c; font-size: 0.88rem; margin-top: 0.5rem; white-space: pre-wrap; }
+    .meta { font-size: 0.8rem; color: #64748b; }
+    audio { width: 100%; margin-top: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th, td { border: 1px solid #e2e8f0; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; width: 38%; }
+    a { color: #2563eb; }
+    .side-col .panel { margin-bottom: 0; flex-shrink: 0; }
+    .metrics-legend {
+      font-size: 0.82rem;
+      flex: 1 1 0;
+      min-height: 12rem;
+      max-height: min(52vh, 520px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-bottom: 0.75rem;
+    }
+    .metrics-legend > strong { flex-shrink: 0; }
+    .metrics-scroll-hint {
+      flex-shrink: 0;
+      margin: 0.3rem 0 0 0;
+      font-size: 0.74rem;
+      color: #64748b;
+    }
+    .metrics-scroll-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      margin-top: 0.45rem;
+      padding: 0.5rem 0.45rem 0.5rem 0.6rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: stable;
+      scrollbar-width: thin;
+      touch-action: pan-y;
+    }
+    .metrics-live-panel {
+      flex: 0 1 auto;
+      min-height: 6rem;
+      max-height: min(36vh, 360px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .metrics-live-panel > strong { flex-shrink: 0; }
+    .metrics-live-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      margin-top: 0.35rem;
+      overflow-x: auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: stable;
+      scrollbar-width: thin;
+      touch-action: pan-y;
+    }
+    .metrics-legend > p:first-of-type.meta { margin-top: 0.35rem; }
+    .metrics-scroll-body > p.meta:first-of-type { margin-top: 0; }
+    .metrics-scroll-body dl { margin: 0.6rem 0 0 0; }
+    .metrics-scroll-body dt {
+      font-weight: 600; color: #334155; margin-top: 0.55rem;
+      font-family: ui-monospace, monospace; font-size: 0.78rem; word-break: break-all;
+    }
+    .metrics-scroll-body dt:first-child { margin-top: 0; }
+    .metrics-scroll-body dd { margin: 0.12rem 0 0 0; padding-left: 0; color: #475569; line-height: 1.45; }
+    .metrics-scroll-body .pill { font-size: 0.68rem; font-weight: normal; color: #64748b; }
+  </style>
+</head>
+<body>
+  <h1>Qwen3-TTS v5 &#xb7; Clone &#x8bd5;&#x7528;</h1>
+  <p class="sub">&#x9759;&#x6001;&#x58f3; &#xb7; &#x4e0b;&#x6e38;
+    <code id="apiBaseLabel">&#x2026;</code> &#xb7; &#x8be6;&#x89c1; OpenAPI
+    <a id="docsLink" href="#" target="_blank" rel="noopener">/docs</a>
+  </p>
+
+  <div class="page-layout">
+    <div class="main-col">
+      <div class="panel">
+        <div class="row">
+          <div>
+            <label for="voice">voice_id&#xb7;&#xff08;&#x6765;&#x81ea;&#x6ce8;&#x518c;&#x8868;&#xff09;</label>
+            <select id="voice"></select>
+          </div>
+          <div>
+            <label for="format">response_format</label>
+            <select id="format">
+              <option value="wav" selected>wav&#xb7;&#xff08;&#x6d41;&#x5f0f;&#xff09;</option>
+              <option value="pcm">pcm</option>
+              <option value="mp3">mp3&#xb7;&#xff08;&#x975e;&#x6d41;&#x5f0f;&#xff09;</option>
+            </select>
+          </div>
+        </div>
+        <label for="text">&#x6587;&#x672c;</label>
+        <textarea id="text" placeholder="&#x8f93;&#x5165;&#x8981;&#x5408;&#x6210;&#x7684;&#x6587;&#x5b57;&#x2026;">&#x6839;&#x636e;&#x60a8;&#x63cf;&#x8ff0;&#x7684;&#x53cd;&#x590d;&#x80c3;&#x75db;&#x3001;&#x996d;&#x540e;&#x52a0;&#x91cd;&#x3001;&#x5076;&#x5c14;&#x53cd;&#x9178;&#xff0c;&#x5efa;&#x8bae;&#x9884;&#x7ea6;&#x6d88;&#x5316;&#x5185;&#x79d1;&#x5c31;&#x8bca;&#x3002;&#x533b;&#x751f;&#x53ef;&#x80fd;&#x4f1a;&#x5efa;&#x8bae;&#x5e7d;&#x95e8;&#x87ba;&#x6746;&#x83cc;&#x68c0;&#x6d4b;&#x6216;&#x80c3;&#x955c;&#x68c0;&#x67e5;&#x3002;&#x5c31;&#x8bca;&#x524d;&#x8bf7;&#x6e05;&#x6de1;&#x996e;&#x98df;&#xff0c;&#x907f;&#x514d;&#x996e;&#x9152;&#x548c;&#x8f9b;&#x8fa3;&#x98df;&#x7269;&#x3002;&#x82e5;&#x51fa;&#x73b0;&#x5455;&#x8840;&#x3001;&#x9ed1;&#x4fbf;&#x6216;&#x5267;&#x70c8;&#x8179;&#x75db;&#xff0c;&#x8bf7;&#x7acb;&#x5373;&#x524d;&#x5f80;&#x6025;&#x8bca;&#x3002;</textarea>
+        <p style="margin-top:0.75rem;">
+          <button type="button" id="btnRun">&#x5408;&#x6210;&#x5e76;&#x64ad;&#x653e;</button>
+          <button type="button" class="secondary" id="btnReloadVoices">&#x5237;&#x65b0;&#x97f3;&#x8272;&#x5217;&#x8868;</button>
+        </p>
+        <div class="err" id="err" style="display:none;"></div>
+        <p class="meta" id="reqMeta"></p>
+        <p class="meta" id="streamHint" style="display:none;"></p>
+        <audio id="player" controls></audio>
+      </div>
+    </div>
+
+    <aside class="side-col">
+      <div class="panel metrics-legend">
+        <strong>METRICS &#x5b57;&#x6bb5;&#x8bf4;&#x660e;</strong>
+        <p class="metrics-scroll-hint">&#x6846;&#x5185;&#x652f;&#x6301;&#x6eda;&#x8f6e;&#x3001;&#x89e6;&#x6478;&#x6ed1;&#x52a8;&#x6216;&#x62d6;&#x52a8;&#x6eda;&#x52a8;&#x6761;&#x67e5;&#x9605;&#x3002;</p>
+        <div class="metrics-scroll-body">
+        <p class="meta">&#x4e0e;&#x540c;&#x4e00;&#x6761;&#x5408;&#x6210;&#x8bf7;&#x6c42;&#x20;
+          <code>_log_metrics</code> &#x5199;&#x5165;&#x3001;&#x518d;&#x7ecf;&#x20;
+          <code>GET /v1/ui/last-metrics</code> &#x65c1;&#x8def;&#x7684;&#x5b57;&#x6bb5;
+          <strong>&#x540c;&#x6e90;</strong>&#x3002;
+          <code>X-Req-Id</code> &#x5bf9;&#x9f50;&#x672c;&#x6761;&#x8bf7;&#x6c42;&#x3002;
+          <code>mode</code>&#xff1a;&#x540e;&#x7aef;&#x53e3;&#x5f84;&#x20;<code>stream</code>&#xff08;wav/pcm &#x6d41;&#x5f0f;&#xff09;
+          / <code>non_stream_mp3</code>&#x3002;</p>
+        <p class="meta">&#x5b57;&#x6bb5;&#x6570;&#x91cf;&#x7531;&#x4e0b;&#x6e38;&#x20;
+          <code>metrics_log_mode</code> &#x51b3;&#x5b9a;&#xff08;&#x53ef;&#x5728;&#x20;
+          <code>GET /v1/ui/effective-config</code> &#x67e5;&#x770b;&#xff09;&#x3002;</p>
+        <ul style="margin:0.35rem 0 0 1rem;padding:0;font-size:0.8rem;color:#475569;">
+          <li><strong>DEV</strong>&#xff1a;&#x7ebf;&#x4e0a;&#x7cbe;&#x7b80;&#xff0c;&#x65c1;&#x8def;&#x4ee5;&#x751f;&#x4ea7;&#x529b;&#x5b57;&#x6bb5;&#x4e3a;&#x4e3b;&#x3002;</li>
+          <li><strong>DEBUG</strong>&#xff1a;&#x8ffd;&#x52a0;&#x9996;&#x5757;&#x4e0a;&#x4e0b;&#x6587;&#x4e0e;&#x20;<code>parity_mode</code>
+            &#x7b49;&#x8bca;&#x65ad;&#x952e;&#xff08;&#x4ec5;&#x5728;&#x540e;&#x7aef;&#x8bb0;&#x5f55;&#x4e86;&#x8fd9;&#x4e9b;&#x952e;&#x65f6;&#x624d;&#x4f1a;&#x51fa;&#x73b0;&#xff09;&#x3002;</li>
+        </ul>
+        <dl>
+          <dt>ttfa_wall_ms <span class="pill">&#x6beb;&#x79d2;&#x20;&#xb7;&#x20;&#x9996;&#x8981;&#x5173;&#x6ce8;</span></dt>
+          <dd><strong>&#x5899;&#x949f;&#x20;&#x54;&#x54;&#x46;&#x41;&#xff08;&#x670d;&#x52a1;&#x7aef;&#xff09;</strong>&#xff1a;&#x4ece;&#x8bf7;&#x6c42;&#x6821;&#x9a8c;&#x5b8c;&#x6210;&#x5e76;&#x5df2;&#x5206;&#x914d;&#x20;
+            <code>req_id</code>&#x5230;&#x670d;&#x52a1;&#x7aef;&#x9996;&#x5757;&#x20;&#x50;&#x43;&#x4d;&#x20;&#x8fdb;&#x5165;&#x53d1;&#x9001;&#x94fe;&#x8def;&#x4e4b;&#x524d;&#x7684;&#x6beb;&#x79d2;&#x6570;&#x3002;
+            &#x542b;&#x20;<code>--concurrency</code>&#x6392;&#x961f;&#x3001;&#x8c03;&#x5ea6;&#x7b49;&#x7b49;&#x5f85;&#xff1b;
+            <strong>&#x2260;</strong>&#x6d4f;&#x89c8;&#x5668;&#x51fa;&#x58f0;&#x65f6;&#x523b;&#xff0c;&#x4e5f;
+            <strong>&#x2260;</strong>&#x7f51;&#x7edc;&#x20;&#x54;&#x54;&#x46;&#x42;&#x20;&#x5b9a;&#x4e49;&#x3002;</dd>
+
+          <dt>ttfa_cuda_graphs_ms <span class="pill">&#x6beb;&#x79d2;&#x20;&#xb7;&#x20;&#x6d41;&#x5f0f;&#x5e38;&#x89c1;</span></dt>
+          <dd>README / <code>benchmarks/throughput.py</code>
+            &#x4e0e;&#x300c;&#x20;&#x43;&#x55;&#x44;&#x41;&#x20;&#x47;&#x72;&#x61;&#x70;&#x68;&#x73;&#x20;&#x6d41;&#x5f0f;&#x20;&#x54;&#x54;&#x46;&#x41;&#x20;&#x300d;&#x6d4b;&#x6cd5;&#x4e00;&#x81f4;&#xff1a;
+            <code>cuda.synchronize</code> &#x2192; &#x9996;&#x5757; &#x2192; synchronize&#x3002;
+            &#x53ef;&#x4e0e;&#x5b98;&#x65b9;&#x20;&#x62;&#x65;&#x6e;&#x63;&#x68;&#x6d;&#x61;&#x72;&#x6b;&#x20;&#x5bf9;&#x6bd4;&#xff1b;&#x4e0d;&#x542b;&#x20;&#x48;&#x54;&#x54;&#x50;&#x20;&#x5c42;&#x5728;&#x69fd;&#x4f4d;&#x4e4b;&#x524d;&#x7684;&#x6392;&#x961f;&#x5206;&#x91cf;&#xff08;&#x66f4;&#x591a;&#x5728;&#x20;
+            <code>ttfa_wall_ms</code>&#xff09;&#x3002;</dd>
+
+          <dt>ttfa_ms <span class="pill">DEBUG &#xb7; &#x6d41;&#x5f0f;&#x5e38;&#x6709;</span></dt>
+          <dd>&#x9996;&#x5757;&#x51fa;&#x73b0;&#x65f6;&#x6a21;&#x578b;&#x20;&#x74;&#x69;&#x6d;&#x69;&#x6e;&#x67;&#x20;&#x8d26;&#x672c;&#x4e2d;&#x7684;&#x7d2f;&#x8ba1;&#x63a8;&#x7406;&#x8017;&#x65f6;&#xff1b;&#x4e00;&#x822c;&#x4e0d;&#x542b;&#x69fd;&#x4f4d;&#x6392;&#x961f;&#x3002;
+            &#x6d;&#x70;&#x33;&#x20;&#x8def;&#x5f84;&#x4e2d;&#x8be5;&#x503c;&#x5b9e;&#x4e3a;&#x6574;&#x6bb5;&#x751f;&#x6210;&#x8017;&#x65f6;&#xff08;&#x547d;&#x540d;&#x6cbf;&#x7528;&#xff09;&#x3002;</dd>
+
+          <dt>first_prefill_ms / first_decode_ms / first_overhead_ms <span class="pill">DEBUG &#xb7; &#x6d41;&#x5f0f;</span></dt>
+          <dd>&#x9996;&#x20;&#x63;&#x68;&#x75;&#x6e;&#x6b;&#x20;&#x63a8;&#x7406;&#x62c6;&#x5206;&#x3002;&#x20;<code>first_overhead_ms</code>&#x7ea6;&#x7b49;&#x4e8e;&#x20;
+            <code>ttfa_cuda_graphs_ms</code> &#x2212;
+            <code>ttfa_ms</code>&#xff08;&#x4e8c;&#x8005;&#x90fd;&#x6709;&#x503c;&#x65f6;&#xff09;&#x3002;</dd>
+
+          <dt>parity_mode <span class="pill">DEBUG &#xb7; &#x6d41;&#x5f0f;</span></dt>
+          <dd><strong>0</strong>&#xff1a;
+            <code>parity_mode=False</code>&#xff0c;&#x20;&#x43;&#x55;&#x44;&#x41;&#x20;&#x47;&#x72;&#x61;&#x70;&#x68;&#x20;&#x5feb;&#x8def;&#x5f84;&#xff1b;
+            <strong>1</strong>&#xff1a;&#x20;&#x50;&#x61;&#x72;&#x69;&#x74;&#x79;&#xff08;&#x975e;&#x20;&#x47;&#x72;&#x61;&#x70;&#x68;&#xff09;&#x3002;
+            &#x82e5;&#x20;<code>--replicas &lt; --concurrency</code>
+            &#x7b49;&#x89e6;&#x53d1;&#x56de;&#x9000;&#xff0c;&#x8bf7;&#x5bf9;&#x7167;&#x542f;&#x52a8;&#x65e5;&#x5fd7;&#x20;
+            <code>STARTUP stream_cuda_graph=</code>&#x3002;</dd>
+
+          <dt>prefill_len / attention_mask_shape / trailing_text_len / icl <span class="pill">DEBUG</span></dt>
+          <dd>&#x9996;&#x5757;&#x4e0a;&#x4e0b;&#x6587;&#x4e0e;&#x6ce8;&#x610f;&#x529b;&#x8bca;&#x65ad;&#x5b57;&#x6bb5;&#x3002;</dd>
+
+          <dt>inter_chunk_max_ms / inter_chunk_p95_ms <span class="pill">&#x6beb;&#x79d2;&#x20;&#xb7;&#x20;&#x6d41;&#x5f0f;</span></dt>
+          <dd>&#x76f8;&#x90bb;&#x20;&#x50;&#x43;&#x4d;&#x20;&#x63;&#x68;&#x75;&#x6e;&#x6b;&#x20;&#x5165;&#x961f;&#x2f;&#x5199;&#x53d1;&#x9001;&#x961f;&#x5217;&#x7684;&#x95f4;&#x9694;&#x4e0a;&#x9650;&#x2f;&#x539f;&#x4fbf;&#x5584;&#x5ea6;&#xff0c;&#x53cd;&#x6620;&#x6d41;&#x5f0f;&#x8fde;&#x7eed;&#x6027;&#x3002;</dd>
+
+          <dt>rtf</dt>
+          <dd><strong>&#x5b9e;&#x65f6;&#x56e0;&#x5b50;</strong>&#xff1a;&#x672c;&#x6b21;&#x4ea7;&#x51fa;&#x97f3;&#x9891;&#x65f6;&#x957f;&#x20;&#xf7;&#x20;&#x5bf9;&#x5e94;&#x751f;&#x6210;&#x8017;&#x65f6;&#xff1b;&#x6570;&#x503c;&#x8d8a;&#x5927;&#x8868;&#x793a;&#x8f83;&#x5b9e;&#x65f6;&#x8dd1;&#x5f97;&#x8d8a;&#x5feb;&#x3002;</dd>
+
+          <dt>audio_s</dt>
+          <dd>&#x672c;&#x6b21;&#x54cd;&#x5e94;&#x5408;&#x6210;&#x97f3;&#x9891;&#x603b;&#x65f6;&#x957f;&#xff08;&#x79d2;&#xff09;&#x3002;</dd>
+
+          <dt>total_gen_ms</dt>
+          <dd>&#x6d41;&#x5f0f;&#x751f;&#x6210;&#x5668;&#x4fa7;&#x7d2f;&#x8ba1;&#x6beb;&#x79d2;&#xff08;&#x5e38;&#x4f5c;&#x20;&#x52;&#x54;&#x46;&#x20;&#x5206;&#x6bcd;&#xff09;&#x3002;</dd>
+
+          <dt>total_ms</dt>
+          <dd>&#x670d;&#x52a1;&#x7aef;&#x89c2;&#x6d4b;&#x5230;&#x7684;&#x603b;&#x5899;&#x949f;&#x6beb;&#x79d2;&#xff08;&#x8d77;&#x6b62;&#x968f;&#x20;<code>mode</code>&#x7565;&#x6709;&#x5dee;&#x5f02;&#xff09;&#x3002;</dd>
+
+          <dt>n_chunks</dt>
+          <dd>&#x6d41;&#x5f0f;&#x62c6;&#x5206;&#x7684;&#x20;&#x50;&#x43;&#x4d;&#x20;&#x5757;&#x6570;&#xff0c;&#x4e0e;&#x20;<code>stream_chunk_size</code>&#x3001;&#x6587;&#x672c;&#x957f;&#x5ea6;&#x7b49;&#x6709;&#x5173;&#x3002;</dd>
+        </dl>
+        </div>
+      </div>
+      <div class="panel metrics-live-panel">
+        <strong>&#x672c;&#x6b21;&#x8bf7;&#x6c42;&#x20;&#x4d;&#x45;&#x54;&#x52;&#x49;&#x43;&#x53;</strong>&#xff08;<code>GET /v1/ui/last-metrics</code>&#xff09;
+        <div class="metrics-live-scroll">
+        <div class="err" id="metricsErr" style="display:none;"></div>
+        <div id="metricsTable"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let API_BASE = "";
+    let SAMPLE_RATE = 24000;
+    const WAV_HEADER_BYTES = 44;
+    let _audioCtx = null;
+
+    function showErr(el, msg) {
+      if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+
+    function concatUint8(a, b) {
+      const out = new Uint8Array(a.length + b.length);
+      out.set(a, 0);
+      out.set(b, a.length);
+      return out;
+    }
+
+    async function loadConfig() {
+      const r = await fetch("/config");
+      if (!r.ok) throw new Error("/config " + r.status);
+      const j = await r.json();
+      API_BASE = (j.api_base || "").replace(/\/$/, "");
+      document.getElementById("apiBaseLabel").textContent = API_BASE || "(empty)";
+      document.getElementById("docsLink").href = API_BASE + "/docs";
+    }
+
+    async function loadEffectiveSampleRate() {
+      try {
+        const r = await fetch(API_BASE + "/v1/ui/effective-config");
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j.sample_rate != null && Number(j.sample_rate) > 0) {
+          SAMPLE_RATE = Number(j.sample_rate);
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    async function loadVoices() {
+      const err = document.getElementById("err");
+      showErr(err, "");
+      const sel = document.getElementById("voice");
+      sel.innerHTML = "";
+      const r = await fetch(API_BASE + "/voices");
+      if (!r.ok) {
+        showErr(err, "GET /voices \u5931\u8d25: " + r.status + " " + await r.text());
+        return;
+      }
+      const j = await r.json();
+      const list = j.voices || [];
+      if (!list.length) {
+        showErr(err, "\u6d3b\u8dc3\u97f3\u8272\u4e3a\u7a7a\u3002\u8bf7\u5148\u5728\u4e0b\u6e38\u670d\u52a1\u4e0a\u6ce8\u518c\u97f3\u8272\u3002");
+        return;
+      }
+      for (const v of list) {
+        const id = v.voice_id || v.id || "";
+        if (!id) continue;
+        const o = document.createElement("option");
+        o.value = id;
+        o.textContent = id;
+        sel.appendChild(o);
+      }
+    }
+
+    function renderMetrics(entry) {
+      const box = document.getElementById("metricsTable");
+      const merr = document.getElementById("metricsErr");
+      showErr(merr, "");
+      if (!entry || !entry.metrics) {
+        box.innerHTML = "<p class='meta'>\u65e0\u6570\u636e</p>";
+        return;
+      }
+      const rows = Object.entries(entry.metrics).map(
+        ([k, v]) => "<tr><th>" + escapeHtml(k) + "</th><td>" + escapeHtml(String(v)) + "</td></tr>"
+      );
+      box.innerHTML =
+        "<p class='meta'>req_id=" + escapeHtml(String(entry.req_id)) +
+        " \u00b7 mode=" + escapeHtml(String(entry.mode)) + "</p>" +
+        "<table><tbody>" + rows.join("") + "</tbody></table>";
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    async function playStreamingPcmResponse(response, wavHeaderBytes) {
+      const reader = response.body && response.body.getReader();
+      if (!reader) throw new TypeError("\u54cd\u5e94\u65e0 body\uff08ReadableStream\uff09\uff0c\u65e0\u6cd5\u6d41\u5f0f\u64ad\u653e");
+
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw new Error("\u6d4f\u89c8\u5668\u4e0d\u652f\u6301 AudioContext");
+
+      if (_audioCtx && _audioCtx.state !== "closed") {
+        try { await _audioCtx.close(); } catch (e) { /* ignore */ }
+      }
+      _audioCtx = new AC({ sampleRate: SAMPLE_RATE });
+      await _audioCtx.resume();
+
+      let leftover = new Uint8Array(0);
+      let strippedHeader = wavHeaderBytes === 0;
+      let nextStart = _audioCtx.currentTime + 0.08;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        const chunk = value ? new Uint8Array(value) : new Uint8Array(0);
+        leftover = chunk.length === 0 ? leftover : (leftover.length === 0 ? chunk : concatUint8(leftover, chunk));
+
+        if (!strippedHeader) {
+          if (leftover.length < wavHeaderBytes) {
+            if (done) throw new Error("\u6d41\u7ed3\u675f\u65f6\u5c1a\u672a\u6536\u5230\u5b8c\u6574 WAV \u5934");
+            continue;
+          }
+          leftover = leftover.subarray(wavHeaderBytes);
+          strippedHeader = true;
+        }
+
+        const align = Math.floor(leftover.length / 2) * 2;
+        if (align === 0) {
+          if (done) break;
+          continue;
+        }
+
+        const pcmBytes = leftover.subarray(0, align);
+        leftover = leftover.subarray(align);
+
+        const samples = align / 2;
+        const audioBuf = _audioCtx.createBuffer(1, samples, SAMPLE_RATE);
+        const ch = audioBuf.getChannelData(0);
+        const dv = new DataView(pcmBytes.buffer, pcmBytes.byteOffset, pcmBytes.byteLength);
+        for (let i = 0; i < samples; i++) {
+          ch[i] = dv.getInt16(i * 2, true) / 32768.0;
+        }
+
+        const src = _audioCtx.createBufferSource();
+        src.buffer = audioBuf;
+        src.connect(_audioCtx.destination);
+        const when = Math.max(nextStart, _audioCtx.currentTime + 0.02);
+        src.start(when);
+        nextStart = when + audioBuf.duration;
+
+        if (done) break;
+      }
+
+      return nextStart;
+    }
+
+    async function fetchMetrics(reqId, merr) {
+      if (!reqId) {
+        showErr(merr, "\u54cd\u5e94\u5934\u7f3a\u5c11 X-Req-Id\uff0c\u65e0\u6cd5\u5bf9\u9f50 METRICS\uff08\u8bf7\u68c0\u67e5\u4e0b\u6e38 CORS expose_headers\uff09");
+        return;
+      }
+      const mr = await fetch(API_BASE + "/v1/ui/last-metrics?req_id=" + encodeURIComponent(reqId));
+      if (!mr.ok) {
+        showErr(merr, "METRICS: " + mr.status + " " + await mr.text());
+        return;
+      }
+      renderMetrics(await mr.json());
+    }
+
+    async function runSynth() {
+      const err = document.getElementById("err");
+      const merr = document.getElementById("metricsErr");
+      const meta = document.getElementById("reqMeta");
+      const hint = document.getElementById("streamHint");
+      const player = document.getElementById("player");
+      showErr(err, "");
+      showErr(merr, "");
+      document.getElementById("metricsTable").innerHTML = "";
+      meta.textContent = "";
+      hint.style.display = "none";
+      hint.textContent = "";
+      player.removeAttribute("src");
+
+      const text = document.getElementById("text").value.trim();
+      const voice = document.getElementById("voice").value;
+      const format = document.getElementById("format").value;
+      if (!text) { showErr(err, "\u8bf7\u8f93\u5165\u6587\u672c"); return; }
+      if (!voice) { showErr(err, "\u8bf7\u9009\u62e9 voice"); return; }
+
+      const btn = document.getElementById("btnRun");
+      btn.disabled = true;
+      try {
+        const r = await fetch(API_BASE + "/v1/audio/speech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "tts-1",
+            input: text,
+            voice: voice,
+            response_format: format
+          })
+        });
+        const reqId = r.headers.get("X-Req-Id");
+        meta.textContent = "HTTP " + r.status + (reqId ? " \u00b7 X-Req-Id=" + reqId : "");
+        if (!r.ok) {
+          showErr(err, "\u5408\u6210\u5931\u8d25: " + await r.text());
+          return;
+        }
+
+        if (format === "wav" || format === "pcm") {
+          hint.style.display = "block";
+          hint.textContent = "wav/pcm\uff1aWeb Audio \u6d41\u5f0f\u89e3\u7801\u4e2d\uff08sample_rate=" + SAMPLE_RATE + "\uff09\u2026";
+          player.style.display = "none";
+          const headerSkip = format === "wav" ? WAV_HEADER_BYTES : 0;
+          await playStreamingPcmResponse(r, headerSkip);
+          hint.textContent = "\u6d41\u5f0f\u64ad\u653e\u5df2\u6392\u7a0b\u5b8c\u6210\uff08METRICS \u89c1\u53f3\u4fa7\uff09\u3002";
+          await fetchMetrics(reqId, merr);
+        } else {
+          player.style.display = "";
+          const blob = await r.blob();
+          const url = URL.createObjectURL(blob);
+          player.src = url;
+          player.play().catch(() => {});
+          await fetchMetrics(reqId, merr);
+        }
+      } catch (e) {
+        showErr(err, String(e));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    (async function init() {
+      try {
+        await loadConfig();
+        await loadEffectiveSampleRate();
+        await loadVoices();
+      } catch (e) {
+        document.getElementById("err").style.display = "block";
+        document.getElementById("err").textContent = String(e);
+      }
+      document.getElementById("btnRun").addEventListener("click", runSynth);
+      document.getElementById("btnReloadVoices").addEventListener("click", loadVoices);
+    })();
+  </script>
+</body>
+</html>

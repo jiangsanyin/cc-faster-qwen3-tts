@@ -1,0 +1,5 @@
+{
+  "tone_wav_file_dir": "/data/tts-jiang/faster-qwen3-tts-assets",
+  "allowed_audio_formats": ["wav", "mp3"],
+  "max_audio_file_size_mb": 20
+}

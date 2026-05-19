@@ -1,9 +1,11 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   svc-faster-qwen3-tts-jiang:
     build: .
     container_name: faster-qwen3-tts-jiangsy
+    # 容器内进程默认工作目录（覆盖镜像 Dockerfile 的 WORKDIR，见说明）
+    working_dir: /data/tts/faster-qwen3-tts
     restart: unless-stopped
     environment:
       # 指定 Gradio 监听所有 IP
@@ -17,26 +19,27 @@ services:
       - .:/app
       
       # 2. 挂载本地模型库目录
-      - /data/models:/data/models
+      - ./models:/data/models
       
       # 3. 挂载你的 TTS 数据/输出目录
-      - /data/tts:/data/tts
+      - /data/tts-jiang:/data/tts
       
     ports:
-      - "10020:7860" # Web UI
-      - "10021:8000" # API
+      - "10017:7860" # Web UI
+      - "10018:8000" # API
+      - "10019:8001" # API
       
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['2']   # 修改这里：指定索引为 3 的显卡（即第 4 块）
+              device_ids: ['2']   # 使用索引对应的显卡（索引从0开始）
               capabilities: [gpu]
 
-    # 【启动命令】你可以根据需要取消注释并在下方修改
-    # 默认执行 Dockerfile 中的 demo/server.py
-    # 如果想启动 API，可以改成如下格式，并指定你本地的模型路径：
+    # 【启动命令】覆盖 Dockerfile 的 CMD；不写 command 时默认跑 demo/server.py
+    # sleep infinity：空转占位，适合 up -d 后用 docker exec -it faster-qwen3-tts-jiangsy bash 进去干活
     # command:["python", "examples/openai_server.py", "--model", "/data/models/你的模型目录名称", "--port", "8000"]
-    # command: ["/bin/bash", "-c", "pip install --no-cache-dir nano-parakeet || true; pip install --no-cache-dir -e '.[demo]' -i https://pypi.tuna.tsinghua.edu.cn/simple && python demo/server.py"]
+    #command: ["/bin/bash", "-c", "pip install --no-cache-dir nano-parakeet -i https://pypi.tuna.tsinghua.edu.cn/simple || true; pip install --no-cache-dir -e '.[demo]' -i https://pypi.tuna.tsinghua.edu.cn/simple && python demo/server.py"]
+    # command: ["/bin/bash", "-c", "python examples/openai_server_v4.py --config config_v4.json --model Qwen/Qwen3-TTS-12Hz-1.7B-Base --host 0.0.0.0 --port 8000 --concurrency 4 --prime-stream-first-chunk --prime-text \"大家好，今晚的水上芭蕾将为大家呈现最动人的表演。\""]
     command: ["sleep", "infinity"]
